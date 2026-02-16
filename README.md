@@ -3,6 +3,7 @@
 Whisp is a real-time text chat application being built as a personal engineering project with enterprise-grade architecture and practices.
 
 The project is designed to support:
+
 - Direct messages between two users
 - Group conversations
 - Channel-based communication
@@ -11,6 +12,7 @@ The project is designed to support:
 ## Why This Project
 
 Whisp is focused on learning and demonstrating strong backend and frontend engineering through:
+
 - Clean Architecture
 - CQRS
 - Domain-driven design principles
@@ -45,6 +47,25 @@ docs/
 
 ## Getting Started
 
+### Docker Compose (Dev)
+
+Run frontend and backend together with Docker Compose:
+
+```bash
+docker compose --env-file .env.compose up -d --build
+```
+
+Stop the stack:
+
+```bash
+docker compose --env-file .env.compose down
+```
+
+Default URLs:
+
+- Frontend: `http://localhost:3000`
+- Backend: `http://localhost:8080/`
+
 ### Frontend
 
 ```bash
@@ -58,6 +79,7 @@ Default local URL: `http://localhost:3000`
 ## Product Requirements
 
 For full scope, requirements, milestones, and architecture decisions, see:
+
 - `docs/prd.md`
 
 ## Contributing
