@@ -1,0 +1,52 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment / local config
+.env
+.env.*
+*.local
+
+# Logs
+*.log
+logs/
+
+# Node / frontend
+node_modules/
+.pnpm-store/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Frontend build and framework outputs
+src/frontend/dist/
+src/frontend/dist-ssr/
+src/frontend/.output/
+src/frontend/.nitro/
+src/frontend/.tanstack/
+src/frontend/.wrangler/
+src/frontend/.vinxi/
+src/frontend/__unconfig*/
+
+# .NET / backend
+**/bin/
+**/obj/
+*.user
+*.rsuser
+*.suo
+
+# Test and coverage artifacts
+coverage/
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# Project-specific local artifacts
+src/frontend/count.txt
+src/frontend/todos.json
