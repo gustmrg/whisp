@@ -220,6 +220,23 @@ app.MapPost("/api/conversations",
         return Results.Created($"/api/conversations/{conversation.Id}", response);
     });
 
+app.MapGet("/api/users",
+    async (IUserRepository userRepo, HttpContext httpContext) =>
+    {
+        var userIdStr = httpContext.Request.Query["userId"].ToString();
+        if (!Guid.TryParse(userIdStr, out var userId))
+            return Results.BadRequest("Missing or invalid userId");
+
+        var users = await userRepo.GetAllAsync();
+        var response = users
+            .Where(u => u.Id != userId)
+            .OrderBy(u => u.DisplayName)
+            .Select(u => new UserResponse(u.Id, u.Username, u.DisplayName))
+            .ToList();
+
+        return Results.Ok(response);
+    });
+
 app.MapGet("/api/users/search",
     async (string q, IUserRepository userRepo, HttpContext httpContext) =>
     {
