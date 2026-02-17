@@ -13,6 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Whisp.Application\Whisp.Application.csproj" />
       <ProjectReference Include="..\Whisp.Domain\Whisp.Domain.csproj" />
     </ItemGroup>
 

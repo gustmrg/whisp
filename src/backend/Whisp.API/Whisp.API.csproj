@@ -16,6 +16,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Whisp.Application\Whisp.Application.csproj" />
       <ProjectReference Include="..\Whisp.Infrastructure\Whisp.Infrastructure.csproj" />
     </ItemGroup>
 
