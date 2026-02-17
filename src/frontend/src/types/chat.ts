@@ -26,9 +26,16 @@ export interface Message {
   status: MessageStatus
 }
 
+export interface ConversationMember {
+  userId: string
+  displayName: string
+  role: string
+}
+
 export interface Conversation {
   id: string
-  participantId: string
+  type: string
+  members: ConversationMember[]
   lastMessage: Message | null
   unreadCount: number
   updatedAt: Date

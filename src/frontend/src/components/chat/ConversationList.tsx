@@ -1,35 +1,53 @@
 import { useState } from 'react'
 import { useParams } from '@tanstack/react-router'
-import { Search } from 'lucide-react'
+import { Search, SquarePen } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { conversations, getContactById, currentUser } from '@/data/mock'
-import { getInitials } from '@/lib/format'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
+import { useConversations } from '@/hooks/use-conversations'
+import {
+  mapConversationResponse,
+  getContactFromConversation,
+} from '@/lib/api'
 import ConversationItem from './ConversationItem'
+import NewConversationView from './NewConversationView'
 
 export default function ConversationList() {
   const [searchQuery, setSearchQuery] = useState('')
+  const [isCreating, setIsCreating] = useState(false)
   const params = useParams({ strict: false }) as { conversationId?: string }
   const activeId = params.conversationId
 
+  const { data: rawConversations, isLoading } = useConversations()
+  const conversations = (rawConversations ?? []).map(mapConversationResponse)
+
   const filtered = conversations.filter((conv) => {
     if (!searchQuery.trim()) return true
-    const contact = getContactById(conv.participantId)
-    return contact?.name.toLowerCase().includes(searchQuery.toLowerCase())
+    const contact = getContactFromConversation(conv)
+    return contact.name.toLowerCase().includes(searchQuery.toLowerCase())
   })
+
+  if (isCreating) {
+    return <NewConversationView onClose={() => setIsCreating(false)} />
+  }
 
   return (
     <div className="flex h-full flex-col">
       <div className="flex shrink-0 items-center gap-3 border-b border-border px-4 py-3">
         <h1 className="text-lg font-bold text-foreground">Whisp</h1>
         <div className="flex-1" />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="shrink-0"
+          onClick={() => setIsCreating(true)}
+        >
+          <SquarePen className="h-5 w-5" />
+        </Button>
         <div className="relative">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} />
-            <AvatarFallback className="text-xs">
-              {getInitials(currentUser.name)}
-            </AvatarFallback>
+            <AvatarFallback className="text-xs">You</AvatarFallback>
           </Avatar>
         </div>
       </div>
@@ -45,14 +63,17 @@ export default function ConversationList() {
         </div>
       </div>
       <ScrollArea className="flex-1">
-        {filtered.length === 0 ? (
+        {isLoading ? (
+          <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+            Loading...
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="px-4 py-8 text-center text-sm text-muted-foreground">
             No conversations found
           </div>
         ) : (
           filtered.map((conv) => {
-            const contact = getContactById(conv.participantId)
-            if (!contact) return null
+            const contact = getContactFromConversation(conv)
             return (
               <ConversationItem
                 key={conv.id}

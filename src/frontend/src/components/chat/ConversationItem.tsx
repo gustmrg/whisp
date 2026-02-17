@@ -4,7 +4,7 @@ import { formatConversationTimestamp } from '@/lib/format'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { getInitials } from '@/lib/format'
-import { currentUser } from '@/data/mock'
+import { CURRENT_USER_ID } from '@/lib/api'
 import OnlineIndicator from './OnlineIndicator'
 import type { Conversation, User } from '@/types/chat'
 
@@ -20,7 +20,7 @@ export default function ConversationItem({
   isActive,
 }: ConversationItemProps) {
   const lastMsg = conversation.lastMessage
-  const isOwnMessage = lastMsg?.senderId === currentUser.id
+  const isOwnMessage = lastMsg?.senderId === CURRENT_USER_ID
 
   return (
     <Link

@@ -1,28 +1,44 @@
-import { useState } from 'react'
+import { useChatContext } from '@/contexts/ChatContext'
+import { useMessages } from '@/hooks/use-messages'
+import { useConversations } from '@/hooks/use-conversations'
 import {
-  conversations,
-  getContactById,
-  getMessagesForConversation,
-  currentUser,
-} from '@/data/mock'
-import { MessageStatus } from '@/types/chat'
+  mapMessageResponse,
+  mapConversationResponse,
+  getContactFromConversation,
+} from '@/lib/api'
 import ChatHeader from './ChatHeader'
 import MessageList from './MessageList'
 import MessageInput from './MessageInput'
-import type { Message } from '@/types/chat'
 
 interface ChatViewProps {
   conversationId: string
 }
 
 export default function ChatView({ conversationId }: ChatViewProps) {
-  const conversation = conversations.find((c) => c.id === conversationId)
+  const { data: rawMessages, isLoading } = useMessages(conversationId)
+  const { data: rawConversations } = useConversations()
+  const { sendMessage } = useChatContext()
+
+  const messages = (rawMessages ?? []).map(mapMessageResponse)
+
+  const conversation = rawConversations
+    ?.map(mapConversationResponse)
+    .find((c) => c.id === conversationId)
   const contact = conversation
-    ? getContactById(conversation.participantId)
+    ? getContactFromConversation(conversation)
     : undefined
-  const [messages, setMessages] = useState<Message[]>(() =>
-    getMessagesForConversation(conversationId),
-  )
+
+  const handleSendMessage = async (content: string) => {
+    await sendMessage(conversationId, content)
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center text-muted-foreground">
+        Loading messages...
+      </div>
+    )
+  }
 
   if (!contact) {
     return (
@@ -30,18 +46,6 @@ export default function ChatView({ conversationId }: ChatViewProps) {
         Conversation not found
       </div>
     )
-  }
-
-  const handleSendMessage = (content: string) => {
-    const newMessage: Message = {
-      id: `msg-new-${Date.now()}`,
-      conversationId,
-      senderId: currentUser.id,
-      content,
-      timestamp: new Date(),
-      status: MessageStatus.Sent,
-    }
-    setMessages((prev) => [...prev, newMessage])
   }
 
   return (

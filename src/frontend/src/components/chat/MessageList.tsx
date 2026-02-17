@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { formatDateSeparator } from '@/lib/format'
-import { currentUser } from '@/data/mock'
+import { CURRENT_USER_ID } from '@/lib/api'
 import MessageBubble from './MessageBubble'
 import type { Message } from '@/types/chat'
 
@@ -33,7 +33,7 @@ export default function MessageList({ messages }: MessageListProps) {
                 <MessageBubble
                   key={message.id}
                   message={message}
-                  isOwn={message.senderId === currentUser.id}
+                  isOwn={message.senderId === CURRENT_USER_ID}
                 />
               ))}
             </div>
