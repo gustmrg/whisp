@@ -12,7 +12,7 @@ using Whisp.Infrastructure.Persistence;
 namespace Whisp.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260216231119_Initial")]
+    [Migration("20260217032405_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -38,10 +38,6 @@ namespace Whisp.Infrastructure.Persistence.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("now()");
 
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uuid")
-                        .HasColumnName("created_by");
-
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("text")
@@ -49,9 +45,6 @@ namespace Whisp.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id")
                         .HasName("pk_conversations");
-
-                    b.HasIndex("CreatedBy")
-                        .HasDatabaseName("ix_conversations_created_by");
 
                     b.ToTable("conversations", (string)null);
                 });
@@ -75,6 +68,13 @@ namespace Whisp.Infrastructure.Persistence.Migrations
                     b.Property<DateTime?>("LastReadAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_read_at");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("Member")
+                        .HasColumnName("role");
 
                     b.HasKey("ConversationId", "UserId")
                         .HasName("pk_conversation_members");
@@ -155,18 +155,6 @@ namespace Whisp.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ix_users_username");
 
                     b.ToTable("users", (string)null);
-                });
-
-            modelBuilder.Entity("Whisp.Domain.Entities.Conversation", b =>
-                {
-                    b.HasOne("Whisp.Domain.Entities.User", "Creator")
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_conversations_users_created_by");
-
-                    b.Navigation("Creator");
                 });
 
             modelBuilder.Entity("Whisp.Domain.Entities.ConversationMember", b =>

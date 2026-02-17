@@ -4,6 +4,9 @@ WORKDIR /src
 
 COPY Whisp.sln ./
 COPY Whisp.API/Whisp.API.csproj Whisp.API/
+COPY Whisp.Application/Whisp.Application.csproj Whisp.Application/
+COPY Whisp.Infrastructure/Whisp.Infrastructure.csproj Whisp.Infrastructure/
+COPY Whisp.Domain/Whisp.Domain.csproj Whisp.Domain/
 RUN dotnet restore Whisp.API/Whisp.API.csproj
 
 COPY . .
@@ -20,6 +23,9 @@ WORKDIR /src
 
 COPY Whisp.sln ./
 COPY Whisp.API/Whisp.API.csproj Whisp.API/
+COPY Whisp.Application/Whisp.Application.csproj Whisp.Application/
+COPY Whisp.Infrastructure/Whisp.Infrastructure.csproj Whisp.Infrastructure/
+COPY Whisp.Domain/Whisp.Domain.csproj Whisp.Domain/
 RUN dotnet restore Whisp.API/Whisp.API.csproj
 
 COPY . .
@@ -39,5 +45,7 @@ ENV ASPNETCORE_URLS=http://0.0.0.0:8080
 EXPOSE 8080
 
 COPY --from=publish /app/publish ./
+
+USER app
 
 ENTRYPOINT ["dotnet", "Whisp.API.dll"]

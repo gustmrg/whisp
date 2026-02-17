@@ -14,11 +14,6 @@ public class ConversationConfiguration : IEntityTypeConfiguration<Conversation>
             .IsRequired()
             .HasConversion<string>();
 
-        builder.HasOne(c => c.Creator)
-            .WithMany()
-            .HasForeignKey(c => c.CreatedBy)
-            .OnDelete(DeleteBehavior.Restrict);
-
         builder.Property(c => c.CreatedAt)
             .IsRequired()
             .HasDefaultValueSql("now()");

@@ -84,4 +84,17 @@ public class ConversationRepository(AppDbContext context) : Repository<Conversat
             member.LastReadAt = lastReadAt;
         }
     }
+
+    public async Task<ConversationMember?> GetAdminAsync(Guid conversationId, CancellationToken cancellationToken = default)
+    {
+        return await Context.ConversationMembers
+            .Include(m => m.User)
+            .FirstOrDefaultAsync(m => m.ConversationId == conversationId && m.Role == ConversationRole.Admin, cancellationToken);
+    }
+
+    public async Task<bool> IsAdminAsync(Guid conversationId, Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await Context.ConversationMembers
+            .AnyAsync(m => m.ConversationId == conversationId && m.UserId == userId && m.Role == ConversationRole.Admin, cancellationToken);
+    }
 }

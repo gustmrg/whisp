@@ -29,7 +29,6 @@ services:
       - backend_nuget:/root/.nuget/packages
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ASPNETCORE_URLS: http://0.0.0.0:8080
       DOTNET_USE_POLLING_FILE_WATCHER: "1"
       ConnectionStrings__DefaultConnection: Host=db;Port=5432;Database=whisp;Username=postgres;Password=postgres
     depends_on:

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Whisp.Domain.Entities;
+using Whisp.Domain.Enums;
 
 namespace Whisp.Infrastructure.Persistence.Configurations;
 
@@ -23,5 +24,10 @@ public class ConversationMemberConfiguration : IEntityTypeConfiguration<Conversa
         builder.Property(cm => cm.JoinedAt)
             .IsRequired()
             .HasDefaultValueSql("now()");
+
+        builder.Property(cm => cm.Role)
+            .IsRequired()
+            .HasConversion<string>()
+            .HasDefaultValue(ConversationRole.Member);
     }
 }

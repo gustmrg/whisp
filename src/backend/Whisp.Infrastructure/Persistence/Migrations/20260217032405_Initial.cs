@@ -12,6 +12,19 @@ namespace Whisp.Infrastructure.Persistence.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "conversations",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    type = table.Column<string>(type: "text", nullable: false),
+                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_conversations", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "users",
                 columns: table => new
                 {
@@ -26,33 +39,14 @@ namespace Whisp.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "conversations",
-                columns: table => new
-                {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
-                    type = table.Column<string>(type: "text", nullable: false),
-                    created_by = table.Column<Guid>(type: "uuid", nullable: false),
-                    created_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_conversations", x => x.id);
-                    table.ForeignKey(
-                        name: "fk_conversations_users_created_by",
-                        column: x => x.created_by,
-                        principalTable: "users",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "conversation_members",
                 columns: table => new
                 {
                     conversation_id = table.Column<Guid>(type: "uuid", nullable: false),
                     user_id = table.Column<Guid>(type: "uuid", nullable: false),
                     joined_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
-                    last_read_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    last_read_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    role = table.Column<string>(type: "text", nullable: false, defaultValue: "Member")
                 },
                 constraints: table =>
                 {
@@ -110,11 +104,6 @@ namespace Whisp.Infrastructure.Persistence.Migrations
                 name: "ix_conversation_members_user_id",
                 table: "conversation_members",
                 column: "user_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_conversations_created_by",
-                table: "conversations",
-                column: "created_by");
 
             migrationBuilder.CreateIndex(
                 name: "ix_messages_conversation_id",
