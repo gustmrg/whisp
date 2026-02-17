@@ -37,6 +37,10 @@ src/frontend/__unconfig*/
 # .NET / backend
 **/bin/
 **/obj/
+**/bin\\*/
+**/obj\\*/
+**/*\\Debug/
+**/*\\Release/
 *.user
 *.rsuser
 *.suo

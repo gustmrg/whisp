@@ -1,10 +1,13 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Scalar.AspNetCore;
+using Whisp.Infrastructure;
+using Whisp.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddInfrastructure(builder.Configuration);
+
 builder.Services.AddOpenApi(options =>
 {
     options.AddDocumentTransformer((document, context, cancellationToken) =>
@@ -27,7 +30,6 @@ builder.Services.AddOpenApi(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -41,6 +43,30 @@ if (app.Environment.IsDevelopment())
                 auth.Token = string.Empty;
             });
     });
+    
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+    // Retry database connection and migration
+    var maxRetries = 10;
+    var delaySeconds = 3;
+
+    for (int i = 0; i < maxRetries; i++)
+    {
+        try
+        {
+            logger.LogInformation("Attempting to connect to database and apply migrations (attempt {Attempt}/{MaxRetries})", i + 1, maxRetries);
+            db.Database.Migrate();
+            logger.LogInformation("Database migrations applied successfully");
+            break;
+        }
+        catch (Exception ex) when (i < maxRetries - 1)
+        {
+            logger.LogWarning(ex, "Failed to connect to database. Retrying in {DelaySeconds} seconds...", delaySeconds);
+            await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
+        }
+    }
 }
 
 app.UseHttpsRedirection();

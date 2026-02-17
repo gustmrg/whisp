@@ -2,6 +2,10 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Whisp.API", "Whisp.API\Whisp.API.csproj", "{92D1176A-FEB4-48D7-8FD8-2407B95F8AF9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Whisp.Domain", "Whisp.Domain\Whisp.Domain.csproj", "{4CEBDB8A-A1D7-42F0-829B-9D87730E1866}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Whisp.Infrastructure", "Whisp.Infrastructure\Whisp.Infrastructure.csproj", "{503ECEC9-F9BD-41A4-AE59-9BB82E87FBB1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +16,13 @@ Global
 		{92D1176A-FEB4-48D7-8FD8-2407B95F8AF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{92D1176A-FEB4-48D7-8FD8-2407B95F8AF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{92D1176A-FEB4-48D7-8FD8-2407B95F8AF9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CEBDB8A-A1D7-42F0-829B-9D87730E1866}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CEBDB8A-A1D7-42F0-829B-9D87730E1866}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CEBDB8A-A1D7-42F0-829B-9D87730E1866}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CEBDB8A-A1D7-42F0-829B-9D87730E1866}.Release|Any CPU.Build.0 = Release|Any CPU
+		{503ECEC9-F9BD-41A4-AE59-9BB82E87FBB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{503ECEC9-F9BD-41A4-AE59-9BB82E87FBB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{503ECEC9-F9BD-41A4-AE59-9BB82E87FBB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{503ECEC9-F9BD-41A4-AE59-9BB82E87FBB1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

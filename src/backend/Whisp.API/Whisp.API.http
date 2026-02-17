@@ -1,6 +1,0 @@
-@Whisp.API_HostAddress = http://localhost:5265
-
-GET {{Whisp.API_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
