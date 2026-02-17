@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Scalar.AspNetCore;
+using Whisp.API.Middlewares;
 using Whisp.Infrastructure;
 using Whisp.Infrastructure.Persistence;
 
@@ -68,6 +69,9 @@ if (app.Environment.IsDevelopment())
         }
     }
 }
+
+app.UseMiddleware<RequestLoggingMiddleware>();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 
