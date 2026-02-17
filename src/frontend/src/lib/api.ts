@@ -1,10 +1,35 @@
 import type { MessageResponse } from '@/hooks/use-signalr'
+import { MessageStatus, UserStatus } from '@/types/chat'
+import type { Conversation, Message, User } from '@/types/chat'
 
 const API_BASE =
   import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5265'
 
-// Temporary hardcoded user ID — replace with auth when available
-export const CURRENT_USER_ID = '00000000-0000-0000-0000-000000000001'
+const CURRENT_USER_STORAGE_KEY = 'whisp.currentUserId'
+
+function requireCurrentUserId(): string {
+  const userId = getCurrentUserId()
+  if (!userId) {
+    throw new Error('Current user is not set')
+  }
+  return userId
+}
+
+export function getCurrentUserId(): string | null {
+  if (typeof window === 'undefined') return null
+  const userId = window.localStorage.getItem(CURRENT_USER_STORAGE_KEY)?.trim()
+  return userId || null
+}
+
+export function setCurrentUserId(userId: string) {
+  if (typeof window === 'undefined') return
+  window.localStorage.setItem(CURRENT_USER_STORAGE_KEY, userId)
+}
+
+export function clearCurrentUserId() {
+  if (typeof window === 'undefined') return
+  window.localStorage.removeItem(CURRENT_USER_STORAGE_KEY)
+}
 
 export const HUB_URL = `${API_BASE}/hubs/chat`
 
@@ -13,8 +38,9 @@ export async function fetchMessages(
   skip = 0,
   take = 50,
 ): Promise<MessageResponse[]> {
+  const userId = requireCurrentUserId()
   const params = new URLSearchParams({
-    userId: CURRENT_USER_ID,
+    userId,
     skip: skip.toString(),
     take: take.toString(),
   })
@@ -42,7 +68,8 @@ export interface MemberResponse {
 }
 
 export async function fetchConversations(): Promise<ConversationResponse[]> {
-  const params = new URLSearchParams({ userId: CURRENT_USER_ID })
+  const userId = requireCurrentUserId()
+  const params = new URLSearchParams({ userId })
   const res = await fetch(`${API_BASE}/api/conversations?${params}`)
   if (!res.ok)
     throw new Error(`Failed to fetch conversations: ${res.status}`)
@@ -55,15 +82,38 @@ export interface UserResponse {
   displayName: string
 }
 
+export async function createUser(
+  username: string,
+  displayName: string,
+): Promise<UserResponse> {
+  const res = await fetch(`${API_BASE}/api/users`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, displayName }),
+  })
+
+  if (!res.ok) {
+    const error = new Error(`Failed to create user: ${res.status}`) as Error & {
+      status: number
+    }
+    error.status = res.status
+    throw error
+  }
+
+  return res.json()
+}
+
 export async function fetchUsers(): Promise<UserResponse[]> {
-  const params = new URLSearchParams({ userId: CURRENT_USER_ID })
+  const userId = requireCurrentUserId()
+  const params = new URLSearchParams({ userId })
   const res = await fetch(`${API_BASE}/api/users?${params}`)
   if (!res.ok) throw new Error(`Failed to fetch users: ${res.status}`)
   return res.json()
 }
 
 export async function searchUsers(query: string): Promise<UserResponse[]> {
-  const params = new URLSearchParams({ q: query, userId: CURRENT_USER_ID })
+  const userId = requireCurrentUserId()
+  const params = new URLSearchParams({ q: query, userId })
   const res = await fetch(`${API_BASE}/api/users/search?${params}`)
   if (!res.ok) throw new Error(`Failed to search users: ${res.status}`)
   return res.json()
@@ -72,7 +122,8 @@ export async function searchUsers(query: string): Promise<UserResponse[]> {
 export async function createConversation(
   participantId: string,
 ): Promise<ConversationResponse> {
-  const params = new URLSearchParams({ userId: CURRENT_USER_ID })
+  const userId = requireCurrentUserId()
+  const params = new URLSearchParams({ userId })
   const res = await fetch(`${API_BASE}/api/conversations?${params}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -84,9 +135,6 @@ export async function createConversation(
 }
 
 // --- Mappers ---
-
-import type { Message, Conversation, User } from '@/types/chat'
-import { MessageStatus, UserStatus } from '@/types/chat'
 
 export function mapMessageResponse(r: MessageResponse): Message {
   return {
@@ -111,7 +159,10 @@ export function mapConversationResponse(r: ConversationResponse): Conversation {
 }
 
 export function getContactFromConversation(conv: Conversation): User {
-  const other = conv.members.find((m) => m.userId !== CURRENT_USER_ID)
+  const currentUserId = getCurrentUserId()
+  const other = currentUserId
+    ? conv.members.find((m) => m.userId !== currentUserId)
+    : conv.members.at(0)
   const name = other?.displayName ?? 'Unknown'
   return {
     id: other?.userId ?? '',

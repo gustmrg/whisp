@@ -220,6 +220,53 @@ app.MapPost("/api/conversations",
         return Results.Created($"/api/conversations/{conversation.Id}", response);
     });
 
+app.MapPost("/api/users",
+    async (CreateUserRequest request, IUserRepository userRepo, IUnitOfWork unitOfWork) =>
+    {
+        const int usernameMaxLength = 30;
+        const int displayNameMaxLength = 50;
+
+        var username = request.Username?.Trim() ?? string.Empty;
+        var displayName = request.DisplayName?.Trim() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(username))
+            return Results.BadRequest("Username is required");
+
+        if (string.IsNullOrWhiteSpace(displayName))
+            return Results.BadRequest("Display name is required");
+
+        if (username.Length > usernameMaxLength)
+            return Results.BadRequest($"Username must be {usernameMaxLength} characters or fewer");
+
+        if (displayName.Length > displayNameMaxLength)
+            return Results.BadRequest($"Display name must be {displayNameMaxLength} characters or fewer");
+
+        var usernameExists = await userRepo.ExistsByUsernameAsync(username);
+        if (usernameExists)
+            return Results.Conflict("Username is already taken");
+
+        var user = new User
+        {
+            Id = Guid.NewGuid(),
+            Username = username,
+            DisplayName = displayName,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        await userRepo.AddAsync(user);
+        try
+        {
+            await unitOfWork.SaveChangesAsync();
+        }
+        catch (DbUpdateException)
+        {
+            return Results.Conflict("Username is already taken");
+        }
+
+        var response = new UserResponse(user.Id, user.Username, user.DisplayName);
+        return Results.Created($"/api/users/{user.Id}", response);
+    });
+
 app.MapGet("/api/users",
     async (IUserRepository userRepo, HttpContext httpContext) =>
     {

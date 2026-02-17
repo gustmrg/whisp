@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useChatContext } from '@/contexts/ChatContext'
 import { useMessages } from '@/hooks/use-messages'
 import { useConversations } from '@/hooks/use-conversations'
@@ -17,7 +18,7 @@ interface ChatViewProps {
 export default function ChatView({ conversationId }: ChatViewProps) {
   const { data: rawMessages, isLoading } = useMessages(conversationId)
   const { data: rawConversations } = useConversations()
-  const { sendMessage } = useChatContext()
+  const { sendMessage, joinConversation, connectionStatus } = useChatContext()
 
   const messages = (rawMessages ?? []).map(mapMessageResponse)
 
@@ -31,6 +32,14 @@ export default function ChatView({ conversationId }: ChatViewProps) {
   const handleSendMessage = async (content: string) => {
     await sendMessage(conversationId, content)
   }
+
+  useEffect(() => {
+    if (connectionStatus !== 'connected') return
+
+    void joinConversation(conversationId).catch((error) => {
+      console.error('Failed to join conversation group:', error)
+    })
+  }, [connectionStatus, conversationId, joinConversation])
 
   if (isLoading) {
     return (

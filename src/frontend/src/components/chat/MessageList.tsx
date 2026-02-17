@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { formatDateSeparator } from '@/lib/format'
-import { CURRENT_USER_ID } from '@/lib/api'
+import { getCurrentUserId } from '@/lib/api'
 import MessageBubble from './MessageBubble'
 import type { Message } from '@/types/chat'
 
@@ -11,6 +11,7 @@ interface MessageListProps {
 
 export default function MessageList({ messages }: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null)
+  const currentUserId = getCurrentUserId()
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'instant' })
@@ -33,7 +34,7 @@ export default function MessageList({ messages }: MessageListProps) {
                 <MessageBubble
                   key={message.id}
                   message={message}
-                  isOwn={message.senderId === CURRENT_USER_ID}
+                  isOwn={message.senderId === currentUserId}
                 />
               ))}
             </div>

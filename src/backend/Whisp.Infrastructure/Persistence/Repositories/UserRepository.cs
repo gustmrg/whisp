@@ -14,8 +14,10 @@ public class UserRepository(AppDbContext context) : Repository<User>(context), I
 
     public async Task<bool> ExistsByUsernameAsync(string username, CancellationToken cancellationToken = default)
     {
+        var normalizedUsername = username.Trim().ToLower();
+
         return await DbSet
-            .AnyAsync(u => u.Username == username, cancellationToken);
+            .AnyAsync(u => u.Username.ToLower() == normalizedUsername, cancellationToken);
     }
 
     public async Task<IReadOnlyList<User>> SearchByUsernameAsync(string query, CancellationToken cancellationToken = default)

@@ -3,6 +3,10 @@ import type { ConnectionStatus } from '@/hooks/use-signalr'
 
 interface ChatContextValue {
   sendMessage: (conversationId: string, body: string) => Promise<void>
+  sendDirectMessage: (
+    participantId: string,
+    body: string,
+  ) => Promise<{ conversationId: string }>
   joinConversation: (conversationId: string) => Promise<void>
   connectionStatus: ConnectionStatus
 }

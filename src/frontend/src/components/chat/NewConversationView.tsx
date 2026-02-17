@@ -7,9 +7,8 @@ import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getInitials } from '@/lib/format'
-import { fetchUsers, createConversation } from '@/lib/api'
-import type { UserResponse } from '@/lib/api'
-import { useChatContext } from '@/contexts/ChatContext'
+import { fetchConversations, fetchUsers } from '@/lib/api'
+import type { ConversationResponse, UserResponse } from '@/lib/api'
 
 interface NewConversationViewProps {
   onClose: () => void
@@ -24,7 +23,6 @@ export default function NewConversationView({
   const [isCreating, setIsCreating] = useState(false)
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { joinConversation } = useChatContext()
 
   useEffect(() => {
     let isCancelled = false
@@ -64,13 +62,36 @@ export default function NewConversationView({
     setIsCreating(true)
 
     try {
-      const conversation = await createConversation(user.id)
-      await joinConversation(conversation.id)
-      await queryClient.invalidateQueries({ queryKey: ['conversations'] })
+      const cachedConversations = queryClient.getQueryData<ConversationResponse[]>(['conversations'])
+      const conversations =
+        cachedConversations
+        ?? await queryClient.fetchQuery({
+          queryKey: ['conversations'],
+          queryFn: fetchConversations,
+        })
+
+      const existingConversation = conversations.find(
+        (conversation) =>
+          conversation.type.toLowerCase() === 'direct'
+          && conversation.members.some((member) => member.userId === user.id),
+      )
+
       onClose()
-      navigate({ to: '/chat/$conversationId', params: { conversationId: conversation.id } })
+
+      if (existingConversation) {
+        navigate({
+          to: '/chat/$conversationId',
+          params: { conversationId: existingConversation.id },
+        })
+        return
+      }
+
+      navigate({
+        to: '/chat/new/$participantId',
+        params: { participantId: user.id },
+      })
     } catch (err) {
-      console.error('Failed to create conversation:', err)
+      console.error('Failed to start direct message:', err)
     } finally {
       setIsCreating(false)
     }
