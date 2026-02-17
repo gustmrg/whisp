@@ -6,7 +6,7 @@ on:
     paths:
       - "src/frontend/**"
       - "src/backend/**"
-      - ".github/workflows/publish-images.yml"
+      - ".github/workflows/ci.yml"
 
 jobs:
   build-frontend:
