@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getInitials } from '@/lib/format'
-import { searchUsers, createConversation } from '@/lib/api'
+import { fetchUsers, createConversation } from '@/lib/api'
 import type { UserResponse } from '@/lib/api'
 import { useChatContext } from '@/contexts/ChatContext'
 
@@ -20,32 +20,44 @@ export default function NewConversationView({
 }: NewConversationViewProps) {
   const [query, setQuery] = useState('')
   const [users, setUsers] = useState<UserResponse[]>([])
-  const [isSearching, setIsSearching] = useState(false)
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true)
   const [isCreating, setIsCreating] = useState(false)
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { joinConversation } = useChatContext()
 
   useEffect(() => {
-    if (!query.trim()) {
-      setUsers([])
-      return
+    let isCancelled = false
+
+    const loadUsers = async () => {
+      setIsLoadingUsers(true)
+      try {
+        const results = await fetchUsers()
+        if (!isCancelled) {
+          setUsers(results)
+        }
+      } catch (err) {
+        console.error('Failed to load users:', err)
+      } finally {
+        if (!isCancelled) {
+          setIsLoadingUsers(false)
+        }
+      }
     }
 
-    const timeout = setTimeout(async () => {
-      setIsSearching(true)
-      try {
-        const results = await searchUsers(query.trim())
-        setUsers(results)
-      } catch (err) {
-        console.error('Failed to search users:', err)
-      } finally {
-        setIsSearching(false)
-      }
-    }, 300)
+    void loadUsers()
 
-    return () => clearTimeout(timeout)
-  }, [query])
+    return () => {
+      isCancelled = true
+    }
+  }, [])
+
+  const normalizedQuery = query.trim().toLowerCase()
+  const filteredUsers = users.filter((user) =>
+    !normalizedQuery
+    || user.displayName.toLowerCase().includes(normalizedQuery)
+    || user.username.toLowerCase().includes(normalizedQuery),
+  )
 
   const handleSelectUser = async (user: UserResponse) => {
     if (isCreating) return
@@ -78,27 +90,27 @@ export default function NewConversationView({
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by username..."
+            placeholder="Filter contacts..."
             className="pl-9"
             autoFocus
           />
         </div>
       </div>
       <ScrollArea className="flex-1">
-        {isSearching ? (
+        {isLoadingUsers ? (
           <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-            Searching...
-          </div>
-        ) : !query.trim() ? (
-          <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-            Search for a user to start a conversation
+            Loading contacts...
           </div>
         ) : users.length === 0 ? (
+          <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+            No contacts available
+          </div>
+        ) : filteredUsers.length === 0 ? (
           <div className="px-4 py-8 text-center text-sm text-muted-foreground">
             No users found
           </div>
         ) : (
-          users.map((user) => (
+          filteredUsers.map((user) => (
             <button
               key={user.id}
               onClick={() => handleSelectUser(user)}

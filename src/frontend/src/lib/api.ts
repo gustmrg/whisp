@@ -55,6 +55,13 @@ export interface UserResponse {
   displayName: string
 }
 
+export async function fetchUsers(): Promise<UserResponse[]> {
+  const params = new URLSearchParams({ userId: CURRENT_USER_ID })
+  const res = await fetch(`${API_BASE}/api/users?${params}`)
+  if (!res.ok) throw new Error(`Failed to fetch users: ${res.status}`)
+  return res.json()
+}
+
 export async function searchUsers(query: string): Promise<UserResponse[]> {
   const params = new URLSearchParams({ q: query, userId: CURRENT_USER_ID })
   const res = await fetch(`${API_BASE}/api/users/search?${params}`)
