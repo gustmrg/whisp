@@ -1,0 +1,52 @@
+services:
+  frontend:
+    image: ${DOCKERHUB_USERNAME}/whisp-frontend:latest
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-3000}:3000"
+    networks:
+      - whisp-network
+    environment:
+      NODE_ENV: production
+      VITE_API_BASE_URL: ${API_BASE_URL}
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    image: ${DOCKERHUB_USERNAME}/whisp-backend:latest
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-8080}:8080"
+    networks:
+      - whisp-network
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
+      Cors__AllowedOrigins__0: ${CORS_ORIGIN}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:18-alpine
+    networks:
+      - whisp-network
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  db_data:
+
+networks:
+  whisp-network:
+    driver: bridge
