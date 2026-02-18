@@ -30,6 +30,8 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/whisp-frontend:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/whisp-frontend:${{ github.sha }}
+          build-args: |
+            VITE_API_BASE_URL=${{ secrets.API_BASE_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

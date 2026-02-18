@@ -20,6 +20,9 @@ CMD ["sh", "-c", "pnpm install --frozen-lockfile && pnpm dev --host 0.0.0.0 --po
 
 FROM base AS prod
 
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+
 COPY . .
 
 RUN pnpm build
